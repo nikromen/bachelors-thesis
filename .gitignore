@@ -1,5 +1,6 @@
 thesis/_markdown_fi-lualatex/
 thesis/fi-lualatex.*
 bc-thesis.zip
+.idea/
 
 !thesis/fi-lualatex.tex
