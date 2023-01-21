@@ -67,15 +67,8 @@ Specfile by mohlo byt mozne generovat - zminit v dokumentaci.
 
 ```yaml
 maintainers:
-  maintainer_github_nickname:
-    emails:
-      - email1
-      - email2
-    name: jmeno
-  maintainer_friend_nick:
-    emails:
-      - email1
-    name: jmeno
+  maintainer_github_nickname: email1
+  maintainer_friend_nick: email2
 
 upstream:
   url: some-url odkud se bude stahovat
@@ -152,4 +145,8 @@ zmeny do COPRu
 ### fsp
 
 Docasne reseni pro instalaci baliku, aby uzivatele nemuseli jak blazni furt davat enable na kazdy
-package a pak ho stahovat -> tohle to udela naraz. Jednoduchy shell script.
+package a pak ho stahovat -> tohle to udela naraz. Jednoduchy shell script. (tohle asi neni
+pravda -> zalozeni skupiny v copru se tomuhle vyhnu)
+
+rozhodne ale reseni, ze kdyz nebude balicek v science packaging, tak zkusi stahnout z fedory... 
+stale plati, ze to bude ez shell script
