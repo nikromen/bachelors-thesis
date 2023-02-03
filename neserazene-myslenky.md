@@ -150,3 +150,18 @@ pravda -> zalozeni skupiny v copru se tomuhle vyhnu)
 
 rozhodne ale reseni, ze kdyz nebude balicek v science packaging, tak zkusi stahnout z fedory... 
 stale plati, ze to bude ez shell script
+
+
+### napad -> kazda branch == jeden balicek
+
+docela cool vec - kdyz kazda branch bude jeden balicek, tak to znamena, ze .packit.yaml
+soubor nemusi resit indentifiery a vubec... packit nemusi wbc obsahovat logiku supportu
+pro monorepa. Kazdy balicek bude jedna branch, v mainu bude "teplate", z te se udela
+git switch -c jmeno-baliku; jmeno-baliku bude i slozka v repu, kde budou metadata
+a spec file - tohle muze udelat nejaky pomocny skript, do ktereho se napise jmeno baliku
+a on sam udela branch, vytvori slozku a soubor s metadaty, kde predvyplni jmeno baliku a
+pokusi se vygenerovat spec file (na zaklade specifikace jazyka). 
+
+Pro autoupdate bota -> ten vytvori branch z branche `jmeno-balicku` se jmenem 
+`__autoupdate_test_jmeno-balicku` a tam se pokusi udelat update, pushne a tim se spusti
+packit workflow pro tento test -> pokud uspeje tak merge a pokud ne -> notify
