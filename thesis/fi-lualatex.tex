@@ -53,7 +53,7 @@
     university  = mu,
     faculty     = fi,
     type        = bc,
-    department  = Katedra počítačových systémů a komunikací,
+    department  = Katedra strojového učení a zpracování dat,
     author      = Jiří Kyjovský,
     gender      = m,
     advisor     = {Ing. Matej Lexa, Ph.D.},
@@ -111,39 +111,385 @@
 \markright{\textsc{Úvod}}
 \addcontentsline{toc}{chapter}{Úvod}
 
+TODO na konci bakalarky
+
+
+% ==================================================================================== %
+% ==================================================================================== %
+
+
 \chapter{Aktuální stav}
+
+Studenti bioinformatiky na FI potřebují ke svému studiu využívat různý
+bioinformatický software, stejně tak vyučující pro výuku. Některý software
+je snadno přístupný a může být nainstalován přímo z repozitáře
+distribuce, která je používána studentem, nebo je dostupný z nějakého jiného
+repozitáře jako je například PyPI. Ne všechen potřebný software je takto dostupný
+a studenti či vyučující by si museli daný software zkompilovat. Fakulta proto 
+provozuje vitruální stroj s operačním systémem Bio-Linux \cite{biolinux_fi},
+který byl využíván pro účely výuky, na nějž se mohou studenti připojit a
+pracovat tam.
+
+% ------------------------------------------------------------------------------------ %
 
 \section{Seznámení se s problémem}
 
-\section{Stav v různých distribucích}
+Bio-Linux, distribuce Linuxu na bázi Ubuntu 14.04 LTS, byl projektem snažícím se poskytnout
+potřebnou množinu programů pro uživatele zajímající se o bioinformatiku
+\cite{biolinux}. Tato distribuce se bohužel již od roku 2019 nachází ve stavu 
+EOL\footnote{EOL znamená End of Life} \cite{biolinux_distrowatch}, čímž vznikla 
+nutnost jej nahradit, jelikož provozování softwaru, který je ve stavu EOL, může
+vést k nepříjemnostem \cite{eol}. Je tedy potřeba studentům a vyučujícím na FI
+poskytnout nějakou základní množinu bioinformatického softwaru, který by byl již
+zabalen a připraven k instalaci na zařízení pro potřeby výuky a nahradit tak 
+zastaralý Bio-Linux.
 
-\subsection{Debian}
+Úkolem bakalářské práce tedy bylo navrhnout vhodné řešení k
+zabalení softwaru, vytvořit nebo využít nějaké úložiště pro tyto balíčky,
+poskytnout uživatelsky přívětivou cestu, jak si balíčky stáhnout a nainstalovat je
+na zařízení. Dále bylo potřeba navrhnout celý systém tak, aby do něj mohl být dle
+potřeby okamžitě přidán či aktualizován software potřebný pro výuku. Celý systém
+by neměl být náročný na údržbu nebo aktualizace a přidávání softwaru by mělo být
+jednoduché, aby s tím neměl vyučující potíže. Takto připravený software se pak
+navíc může nainstalovat na nový virtuální stroj, který bude fakulta provozovat
+jako v případě Bio-Linuxu.
 
-\subsection{Fedora}
+% ------------------------------------------------------------------------------------ %
+
+\section{Ubuntu}
+
+TODO aktualni stav bioinforrmatickych baliku v ubuntu
+
+
+% ------------------------------------------------------------------------------------ %
+
+\section{Fedora}
+
+TODO aktualni stav bioinforrmatickych baliku ve fedora
+
+
+\subsection{Copr}
+
+% ------------------------------------------------------------------------------------ %
+
+\section{Conda}
+
+TODO aktualni stav bioinforrmatickych baliku pro condu
+
+
+\subsection{Conda-forge}
+
+
+% ==================================================================================== %
+% ==================================================================================== %
+
+
+\chapter{Obecný návrh}
+
+Hlavní motivací při návrhu celého systému pro mě bylo použít co nejvíce fungujících
+nástrojů a služeb, spojit je dohromady tak, aby vytvořily funkční celek a soustředit
+se co nejvíce na automatizaci a zpříjemnění interakce se systémem pro jeho uživatele.
+Celý systém jsem tedy rozdělil do čtyř hlavních komponent:
+
+\paragraph{Build systém}
+Jádro celého systému. Služba, která bude schopna sestavit balíček z daného softwaru
+a tento balíček vrátit.
+
+\paragraph{Úložiště}
+Databáze, která bude obsahovat již sestavené balíčky, vrácené z build systému, které
+jsou připraveny k instalaci na zařízení uživatele.
+
+\paragraph{Služba pro interakci správce se systémem}
+Pomocí této služby bude správce komunikovat s build systémem a databází v intuitivní
+a abstraktní rovině. Detaily build systému nebo databáze zůstanou správci skryty.
+
+\paragraph{Sada nástrojů pro interakci}
+Doplňující, již existující nebo mnou vytvořená, množina nástrojů, která bude spojovat
+tři výše zmíněné komponenty do funkčního celku.
+
+\bigbreak
+Zavedl jsem pohledy správce a uživatele na systém a podle nich jsem postupoval nezávisle
+na zvolení build systému nebo úložiště tak, aby bylo těmto pohledům vyhověno a zároveň
+abych mohl později zvolit vhodný build systém s úložištěm.
+
+% ------------------------------------------------------------------------------------ %
+
+\section{Pohled uživatele}
+
+Instalace softwaru z pohledu uživatele musí být co nejméně náročná a zároveň
+by se neměly na uživatele přenášet žádné složitější úkony, aby byla práce
+se systémem co nejjednodušší. V ideálním případě by měl být celý systém
+navržen tak, aby si uživatel nainstaloval software pomocí jediného příkazu.
+
+V případě interakce uživatele s virtuálním strojem musí být tento stroj rovnou
+připravený k používání poté, co se k němu uživatel připojí, což znamená, že
+množina softwaru musí být na virtuálním stroji již předinstalována.
+
+% ------------------------------------------------------------------------------------ %
+
+\section{Pohled správce}
+
+Správce bude mít za úkol přidávat nový software do systému, případně jej
+může aktualizovat. Po přidání nového softwaru nebo jeho aktualizace se
+spustí série automatizovaných úkonů, které zaručí, že software bude
+správně zabalen a bude dostupný uživateli k instalaci.
+
+Aktualizace softwaru by neměla být primární zodpovědnost správce, systém
+totiž bude periodicky kontrolovat nové verze softwaru a pokusí se je
+sám aktualizovat. V případě neúspěchu bude správce o tomto skutku
+kontaktován prostřednictvím emailu.
+
+% ------------------------------------------------------------------------------------ %
+
+\section{Repozitář metadat}
+
+Pro interakci mezi správcem a systémem jsem se rozhodl použít podobný
+koncept, který používá Flathub, což je schraňování potřebných metadat
+aplikace, jako je například seznam závislostí nebo zdroj upstreamu, v
+git repozitáři. Odsud se aplikace automatizovanou cestou díky
+poskytnutým metadatům sestaví a odešle na úložiště Flathubu.
+Přidání nové aplikace se řeší přes pull request na GitHubu 
+a po schválení administrátory se vytvoří nový repozitář v organizaci
+\textit{github.com/flathub}
+\cite{flatpak_app_creation, flatpak_app_repo, flatpak_app_build}, do
+kterého mají administrátoři přístup a mohou daný software dále
+aktualizovat přes pull requesty v jejich přiděleném repozitáři pro
+danou aplikaci \cite{flatpak_app_update}.
+
+Podobný koncept však není nic nového. Například Fedora používá pro
+ukládání metadat také řešení na konceptu gitu a říká jí 
+dist-git \cite{dist-git}. Všechna metadata balíčků má uložené ve
+své vlastní git službě\footnote{Dostupné na 
+\url{https://src.fedoraproject.org/}}. Conda-forge také používá
+podobné řešení na GitHubu\footnote{Všechny balíčky jsou dostupné
+na \url{https://github.com/orgs/conda-forge/repositories}} jako
+Flathub \cite{conda-forge_repo_creation}.
+
+
+\subsection{Struktura úložiště metadat}
+\label{item:2.3.1}
+
+Stejně jako v případě řešení Flathubu jsem se rozhodl ukládat metadata
+balíčků na GitHubu, kde správce bude moct pomocí pull requestu přidávat
+nové balíčky nebo ty stávající aktualizovat.
+
+Pro jednoduchost jsem nepoužil myšlenku jeden repozitář - jeden balíček,
+nýbrž všechny balíčky budou skladovány v jednom velkém repozitáři, kde
+každý příslušný balíček bude mít svůj adresář s metadaty. Rozdělení 
+každého balíčku do separátního repozitáře je vhodné pro situaci, kde
+máme mnoho správců starající se o své balíčky a jiné je nezajímají.
+Toto rozdělení zajišťuje oddělené práva přístupu. Naproti tomu v
+našem případě se o balíčky bude starat pouze jedna entita a to je
+fakulta, takže pro správce bude jednodušší, když bude mít všechny
+své balíčky na jednom místě.
+
+\begin{figure}[H]
+  \begin{center}
+    \includegraphics[width=0.6\textwidth]{images/png/repository_structure.png}
+  \end{center}
+  \caption{Ukázka struktury GitHub repozitáře}
+  \label{fig:repository_structure}
+\end{figure}
+
+
+\subsection{Metadata balíčku}
+
+Jak můžeme vidět na obrázku \ref{fig:repository_structure}, každý
+balíček obsahuje soubor \textit{metadata.yaml}, který specifikuje
+určitá metadata:
+
+\paragraph{maintainers}
+Seznam správců, kteří zodpovídají za konkrétní balíček. Tento seznam
+bude u každého správce obsahovat jeho GitHub nickname a email.
+
+\paragraph{url}
+URL odkud bude upstream daného balíčku dostupný ke stažení.
+
+\paragraph{version}
+Aktuální verze balíčku v době aktualizace nebo přidání. Podle téhle
+informace bude systém určovat, jestli je daný balíček aktuální.
+
+\paragraph{sha512}
+Checksum, konkrétně typu SHA512, podle kterého si bude systém ověřovat
+pravost stáhnutého zdroje.
+
+\paragraph{autoupdate}
+Výchozí hodnota nastavena na \textbf{True}. Určuje, jestli se má systém
+pokoušet balíček automaticky aktualizovat.
+
+
+\subsection{Správa balíčků}
+
+Jak již bylo zmíněno v sekci \ref{item:2.3.1}, správce bude interagovat
+se systémem pomocí pull requestu. V případě přidání nového balíčku
+správce vytvoří v repozitáři nový adresář. Jeho jméno bude použito jako
+jméno balíčku. V tomto adresáři správce vyplní potřebná metadata a systém
+skrze GitHub Action\footnote{CI$\backslash$CD systém od 
+GitHubu\cite{gh_actions}} automaticky otestuje, jestli se balíček podaří
+sestavit. Pokud ano, může správce pull request spojit s hlavní větví a 
+přes GitHub Actions se balíček pošle do databáze tak, aby byl dostupný 
+uživateli k instalaci. V případě aktualizace bude celá situace obdobná,
+pouze správce upraví již existující metadata balíčku tak, aby se 
+aktualizace správně sestavila.
+
+
+\subsection{Automatická aktualizace balíčků}
+
+Systém bude periodicky hlídat upstream verzi balíčku (co měsíc/týden/den)
+a při zjištění nové verze se provede pokus o aktualizaci. Bohužel je nevýhodné
+využít již navrženého schématu k aktualizaci skrze pull request kvůli
+přísným limitům GitHubu na vytváření obsahu \cite{gh_secondary_rate_limits}
+a velmi omezujícímu způsobu, jak se těmto chybám s limity vyhnout
+\cite{gh_avoid_secondary_rate_limits}.
+
+Pokus o aktualizaci se provede vytvořením nové větve a změnou atributu
+\textbf{version} v metadatech balíčku na nejnovější verzi. Po aplikování
+změn do této větve se nad ní spustí stejný CI systém, který testuje pull
+requesty, jen se bude lišit spouštěč události, jenž bude push do testovací
+větve \cite{gh_push_trigger}. Po úspěšném sestavení balíčku se testovací 
+větev spojí s hlavní větví a úplně se tak vyhneme nutnosti vytvářet pull
+request. V případě neúspěchu bude kontaktován správce uvedený v metadatech
+balíčku.
+
+
+\subsection{Issue repozitář}
+
+Pro sledování neaktuálních balíčků existuje separátní issue repozitář, kde
+jsou vedeny záznamy o jednotlivých neúspěšně aktualizovaných a tedy neaktuálních
+balíčcích. Tento repozitář umožní hlavnímu správci větší přehled o aktuálnosti
+balíčků v repozitáři. Záznamy jsou vytvářeny automatizovaně při neúspěšné automatizované
+aktualizaci balíčku a stejně tak jsou automatizovaně mazány v případě, že správce
+balíček sám aktualizuje.
+
+
+\subsection{Úložiště a build systém}
+
+Systém separátně využije build systému, který sestavuje balíčky na základě
+poskytnutých zdrojů a následně takto sestavený balíček vrátí, aby mohl být
+uložen do nějaké databáze, odkud bude dostupný uživatelům k instalaci.
+Implementace vlastního build systému je komplikovaný úkol a proto budou
+databáze i build systém odděleny od GutHub repozitáře kvůli možnosti
+využití již existujícího řešení. Komunikace mezi těmito systémy bude
+zajištěna skrze GitHub Actions. Výběr build systému a k tomu vhodného
+úložiště jsem diskutoval v následující kapitole.
+
+
+% ==================================================================================== %
+% ==================================================================================== %
+
 
 \chapter{Metody}
 
-\section{Obecný návrh}
+Možnosti, jak zabalit software a následně jej jakkoliv spravovat je
+jistě spousta. Pro náš účel jsou vhodné metody, které jsou uživatelsky
+přívětivé, software jde s jejich pomocí snadno zabalit a v neposlední řadě
+je důležité, aby nad zabaleným softwarem měl plnou kontrolu jeho správce,
+který může libovolně a rychle přidávat nebo odstraňovat software. Kvůli poslední
+zmíněné vlastnosti tak odpadávají možnosti jako snažit se zabalit software
+do nějaké distribuce, poněvadž zabalit software do oficiálních repozitářů
+distribucí je typicky časově velmi nákladná činnost.
 
-\section{Kritéria}
+% ------------------------------------------------------------------------------------ %
 
-\section{COPR}
+\section{Copr}
+
+% ------------------------------------------------------------------------------------ %
 
 \section{Flatpak}
+
+
+\subsection{Repozitář}
+
+Samotný Flatpak není takovou službou, jak je tomu u Copru, repozitář by bylo
+nutno zprovoznit za pomocí zdrojů, které by poskytnula sama fakulta.
+
+
+% ==================================================================================== %
+% ==================================================================================== %
+
 
 \chapter{Srovnání metod}
 
-\section{COPR}
+V této kapitole jsem se zaměřil na srovnání použitých metod z předchozí
+kapitoly. Srovnával jsem na základě předem definovaných kritérií, zvážil
+jejich výhody i nevýhody a následně vybral vhodnější metodu k implementaci
+řešení.
+
+% ------------------------------------------------------------------------------------ %
+
+\section{Kritéria}
+
+Pro výběr lepší metody je nutné zvolit kritéria, která budou zřetelně hodnotit
+různé vlastnosti srovnávané metody. Zvolil jsem čtyři důležitá kritéria:
+
+\paragraph{Nároky na údržbu}
+Vzhledem k faktu, že správcem celého systému má být vyučující, musí být správa
+celého systému co nejméně časově náročná, ideálně bezúdržbová. Důraz bude
+kladen hlavně na části systému, které potenciálně vyžadují pravidelnou
+údržbu a také na části, které mohou selhat a bude třeba je znovu zprovoznit
+silami fakulty.
+
+\paragraph{Nároky na zdroje}
+Zvolené řešení může potřebovat ke svému hladkému provozu nějaké zdroje, které
+mohou být například: úložiště, výpočetní výkon nebo potřeba dalšího správce,
+který by řešil problémy typu aktualizace celého systému a byl by schopen zprovoznit
+systém v případě, že by cokoliv selhalo. Zdroje fakulty samozřejmě nejsou neomezené
+a tedy řešení by mělo využívat dostupné zdroje fakulty střídmě a ideálně bez potřeby
+správce navíc.
+
+\paragraph{Uživatelská přívětivost}
+V ideálním případě by si uživatel měl o nainstalování softwaru na své zařízení
+říct jedním příkazem nebo pár kliknutími. Pokud by bylo komplikované software
+nainstalovat na zařízení uživatele, ztrácelo by to smysl.
+
+\paragraph{Proveditelnost}
+A v neposlední řadě bych měl být schopen celý systém se zvolenou metodou 
+implementovat v rozumném časovém rozmezí, které je hodno bakalářské práci 
+a to do takové podoby, ve které bude systém použitelný a nebo by mohla být
+nad systémem připravena další bakalářská práce, která by celý systém dokončila
+do použitelného stavu. V případě extrémní složitosti a časové náročnosti při 
+návrhu a implementaci systému jej nemá smysl dělat, jelikož by v tomto případě
+nemusel také být nikdy dokončen.
+
+ \paragraph{Spolehlivost}
+
+% ------------------------------------------------------------------------------------ %
+
+\section{Copr}
+
+popis copru
+
+% ------------------------------------------------------------------------------------ %
 
 \section{Flatpak}
 
+popis flatpaku
+
+% ------------------------------------------------------------------------------------ %
+
 \section{Výběr vhodné metody}
 
-\chapter{Návrh}
+sekce o srovnani flatpaku s coprem a vyber viteze
+
+
+% ==================================================================================== %
+% ==================================================================================== %
+
+
+\chapter{Implementace}
+
+TODO tady budou detaily o implementaci a bla bla
+
+
+% ==================================================================================== %
+% ==================================================================================== %
+
 
 \chapter*{Závěr}
 \markright{\textsc{Závěr}}
 \addcontentsline{toc}{chapter}{Závěr}
+
+TODO na konci bakalarky
 
 \printbibliography[heading=bibintoc] %% Print the bibliography.
 
