@@ -57,8 +57,8 @@
     author      = Jiří Kyjovský,
     gender      = m,
     advisor     = {Ing. Matej Lexa, Ph.D.},
-    title       = {TODO},
-    TeXtitle    = {TODO},
+    title       = {Úložiště programů pro výuku bioinformatiky na FI MU},
+    TeXtitle    = {Úložiště programů pro výuku bioinformatiky na FI MU},
     keywords    = {TODO},
     TeXkeywords = {TODO},
     abstract    = {%
@@ -158,23 +158,24 @@ jako v případě Bio-Linuxu.
 
 \section{Ubuntu}
 
-TODO aktualni stav bioinforrmatickych baliku v ubuntu
+TODO aktualni stav bioinforrmatickych baliku v ubuntu a balikovani v ubuntu obecne
 
 
 % ------------------------------------------------------------------------------------ %
 
 \section{Fedora}
 
-TODO aktualni stav bioinforrmatickych baliku ve fedora
+TODO aktualni stav bioinforrmatickych baliku ve fedora a balikovani ve fedore obecne
 
 
 \subsection{Copr}
+\label{item:1.3.1}
 
 % ------------------------------------------------------------------------------------ %
 
 \section{Conda}
 
-TODO aktualni stav bioinforrmatickych baliku pro condu
+TODO aktualni stav bioinforrmatickych baliku pro condu a baleni conda nastroju
 
 
 \subsection{Conda-forge}
@@ -184,30 +185,26 @@ TODO aktualni stav bioinforrmatickych baliku pro condu
 % ==================================================================================== %
 
 
-\chapter{Obecný návrh}
+\chapter{Návrh softwarového repozitáře}
 
-Hlavní motivací při návrhu celého systému pro mě bylo použít co nejvíce fungujících
-nástrojů a služeb, spojit je dohromady tak, aby vytvořily funkční celek a soustředit
-se co nejvíce na automatizaci a zpříjemnění interakce se systémem pro jeho uživatele.
-Celý systém jsem tedy rozdělil do čtyř hlavních komponent:
+Hlavní motivací při návrhu celého systému bylo použít co nejvíce fungujících
+nástrojů a služeb a ty spojit dohromady tak, aby vytvořily celistvý celek. Tím pádem
+jsem se mohl soustředit co nejvíce na automatizaci a zpříjemnění interakce se systémem
+pro jeho uživatele. Celý systém jsem tedy rozdělil do čtyř hlavních komponent:
 
-\paragraph{Build systém}
-Jádro celého systému. Služba, která bude schopna sestavit balíček z daného softwaru
-a tento balíček vrátit.
+\begin{itemize}
+    \item[\textbf{Build systém}] Jádro celého systému. Služba, která bude 
+    schopna sestavit balíček z daného softwaru a tento balíček vrátit.
+    \item[\textbf{Úložiště}] Databáze, která bude obsahovat již sestavené balíčky,
+    vrácené z build systému, které jsou připraveny k instalaci na zařízení uživatele.
+    \item[\textbf{Služba pro interakci správce se systémem}] Pomocí této služby
+    bude správce komunikovat s build systémem a databází v intuitivní a abstraktní
+    rovině. Detaily build systému nebo databáze zůstanou správci skryty.
+    \item[\textbf{Sada nástrojů pro interakci}] Doplňující množina nástrojů, již
+    existující nebo mnou vytvořená, která bude spojovat tři výše zmíněné komponenty
+    do funkčního celku.
+\end{itemize}
 
-\paragraph{Úložiště}
-Databáze, která bude obsahovat již sestavené balíčky, vrácené z build systému, které
-jsou připraveny k instalaci na zařízení uživatele.
-
-\paragraph{Služba pro interakci správce se systémem}
-Pomocí této služby bude správce komunikovat s build systémem a databází v intuitivní
-a abstraktní rovině. Detaily build systému nebo databáze zůstanou správci skryty.
-
-\paragraph{Sada nástrojů pro interakci}
-Doplňující, již existující nebo mnou vytvořená, množina nástrojů, která bude spojovat
-tři výše zmíněné komponenty do funkčního celku.
-
-\bigbreak
 Zavedl jsem pohledy správce a uživatele na systém a podle nich jsem postupoval nezávisle
 na zvolení build systému nebo úložiště tak, aby bylo těmto pohledům vyhověno a zároveň
 abych mohl později zvolit vhodný build systém s úložištěm.
@@ -216,10 +213,11 @@ abych mohl později zvolit vhodný build systém s úložištěm.
 
 \section{Pohled uživatele}
 
-Instalace softwaru z pohledu uživatele musí být co nejméně náročná a zároveň
-by se neměly na uživatele přenášet žádné složitější úkony, aby byla práce
+Instalace softwaru z pohledu uživatele musí být co nejméně náročná. Zároveň
+se nesmí na uživatele přenášet žádné složitější úkony, aby byla práce
 se systémem co nejjednodušší. V ideálním případě by měl být celý systém
-navržen tak, aby si uživatel nainstaloval software pomocí jediného příkazu.
+navržen tak, aby si uživatel nainstaloval software pomocí jediného příkazu
+v terminálu.
 
 V případě interakce uživatele s virtuálním strojem musí být tento stroj rovnou
 připravený k používání poté, co se k němu uživatel připojí, což znamená, že
@@ -275,7 +273,7 @@ nové balíčky nebo ty stávající aktualizovat.
 
 Pro jednoduchost jsem nepoužil myšlenku jeden repozitář - jeden balíček,
 nýbrž všechny balíčky budou skladovány v jednom velkém repozitáři, kde
-každý příslušný balíček bude mít svůj adresář s metadaty. Rozdělení 
+každý příslušný balíček bude mít svou větev. Rozdělení 
 každého balíčku do separátního repozitáře je vhodné pro situaci, kde
 máme mnoho správců starající se o své balíčky a jiné je nezajímají.
 Toto rozdělení zajišťuje oddělené práva přístupu. Naproti tomu v
@@ -283,59 +281,122 @@ našem případě se o balíčky bude starat pouze jedna entita a to je
 fakulta, takže pro správce bude jednodušší, když bude mít všechny
 své balíčky na jednom místě.
 
+Obsahem každé větve budou nějaké předdefinované soubory jako 
+\textbf{README.md} nebo soubory obsahující CI konfigurace. Dále bude 
+každá větev obsahovat soubor s metadaty balíčku nazývající se
+\textbf{metadata.yaml}.
+
 \begin{figure}[H]
-  \begin{center}
-    \includegraphics[width=0.6\textwidth]{images/png/repository_structure.png}
-  \end{center}
-  \caption{Ukázka struktury GitHub repozitáře}
-  \label{fig:repository_structure}
+    \begin{center}
+      \includegraphics[width=0.6\textwidth]{images/png/repository_structure.png}
+    \end{center}
+    \caption{Ukázka struktury jedné větve GitHub repozitáře}
+    \label{fig:repository_structure}
 \end{figure}
 
 
 \subsection{Metadata balíčku}
 
 Jak můžeme vidět na obrázku \ref{fig:repository_structure}, každý
-balíček obsahuje soubor \textit{metadata.yaml}, který specifikuje
+balíček obsahuje soubor \textbf{metadata.yaml}, který specifikuje
 určitá metadata:
 
-\paragraph{maintainers}
-Seznam správců, kteří zodpovídají za konkrétní balíček. Tento seznam
-bude u každého správce obsahovat jeho GitHub nickname a email.
-
-\paragraph{url}
-URL odkud bude upstream daného balíčku dostupný ke stažení.
-
-\paragraph{version}
-Aktuální verze balíčku v době aktualizace nebo přidání. Podle téhle
-informace bude systém určovat, jestli je daný balíček aktuální.
-
-\paragraph{sha512}
-Checksum, konkrétně typu SHA512, podle kterého si bude systém ověřovat
-pravost stáhnutého zdroje.
-
-\paragraph{autoupdate}
-Výchozí hodnota nastavena na \textbf{True}. Určuje, jestli se má systém
-pokoušet balíček automaticky aktualizovat.
+\begin{itemize}
+    \item[\textbf{maintainers}] Seznam správců, kteří zodpovídají za
+    konkrétní balíček. Tento seznam bude u každého správce obsahovat
+    jeho GitHub uživatelské jméno a email, který bude použit v případě
+    potřeby komunikace.
+    \item[\textbf{url}] URL odkud bude upstream daného balíčku dostupný 
+    ke stažení.
+    \item[\textbf{version}] Aktuální verze balíčku v době aktualizace
+    nebo přidání. Podle téhle informace bude systém určovat, jestli je
+    daný balíček aktuální.
+    \item[\textbf{sha512}] Checksum, konkrétně typu SHA512, podle kterého
+    si bude systém ověřovat pravost stáhnutého zdroje.
+    \item[\textbf{autoupdate}] Výchozí hodnota nastavena na \textbf{True}.
+    Určuje, jestli se má systém pokoušet balíček automaticky aktualizovat.
+\end{itemize}
 
 
 \subsection{Správa balíčků}
 
 Jak již bylo zmíněno v sekci \ref{item:2.3.1}, správce bude interagovat
 se systémem pomocí pull requestu. V případě přidání nového balíčku
-správce vytvoří v repozitáři nový adresář. Jeho jméno bude použito jako
-jméno balíčku. V tomto adresáři správce vyplní potřebná metadata a systém
-skrze GitHub Action\footnote{CI$\backslash$CD systém od 
-GitHubu\cite{gh_actions}} automaticky otestuje, jestli se balíček podaří
-sestavit. Pokud ano, může správce pull request spojit s hlavní větví a 
-přes GitHub Actions se balíček pošle do databáze tak, aby byl dostupný 
-uživateli k instalaci. V případě aktualizace bude celá situace obdobná,
-pouze správce upraví již existující metadata balíčku tak, aby se 
-aktualizace správně sestavila.
+správce vytvoří v upstream repozitáři novou větev. Její jméno se musí
+shodovat se jménem balíčku. V této větvi správce u sebe lokálně vyplní
+potřebná metadata a následně vytvoří pull request. Systém skrze GitHub
+Action\footnote{CI$\backslash$CD systém od  GitHubu\cite{gh_actions}}
+automaticky otestuje, jestli se balíček podaří sestavit. Pokud ano, může
+správce pull request potvrdit a přes GitHub Actions se balíček pošle do
+databáze tak, aby byl dostupný uživateli k instalaci. V případě aktualizace
+bude celá situace obdobná, pouze správce upraví již existující metadata 
+balíčku tak, aby se aktualizace správně sestavila. Pro minimalizaci
+lidské chyby při manipulaci s lokálním git repozitářem bude celý
+pracovní postup zapouzdřen do speciálního nástroje 
+\textbf{alpa}\footnote{Vyvíjen na
+\url{https://github.com/fedora-alternative-packaging/alpa}}.
+
+
+\subsection{alpa}
+
+Vkládání nových balíčků vyžaduje vytváření nových větví, přičemž
+se větvení provádí pro nový balíček vždy z hlavní větve. Pro
+vytváření pull requestů je nutné vytvořit ještě další novou
+větev z větve balíčku a následně ji s ní sjednotit. Takovýto
+postup se lehce stane nepřehledným ve chvíli, kdy se v repozitáři
+nachází spousta balíčků.
+
+\begin{figure}[H]
+    \begin{center}
+      \includegraphics[width=1\textwidth]{images/png/feature_branch.png}
+    \end{center}
+    \caption{Feature větev balíčku}
+    \label{fig:feature_branch}
+\end{figure}
+
+Pro vyvarování se chyb se špatnou prací s větvemi a celkově
+lokálním git repozitářem jsem vytvořil nástroj \textbf{alpa},
+který uživateli umožňuje komunikovat s repozitářem bez přímého
+použití \textbf{git} nástroje a skrývá tak implementační detaily 
+do pár jednoduchých příkazů:
+
+\begin{itemize}
+    \item[\textbf{create}] Vytvoří novou větev pro balíček za
+    předpokladu, že správce má commit práva do softwarového repozitáře.
+    \item[\textbf{request-package}] V případě, kdy uživatel nemá práva
+    dělat commity v repozitáři, může poslat žádost o vytvoření
+    větve pro balíček. Automat se postará o její vytvoření.
+    \item[\textbf{delete}] Zažádá o smazání balíčku, ve kterém se
+    zrovna uživatel nachází. O smazání v repozitáři se postará automat.
+    \item[\textbf{switch}] Přepne větev repozitáře do větve uvedené 
+    uživatelem. V případě dostupné \textit{feature branch} přepne do ní.
+    \item[\textbf{show-history}] Ukáže historii commitů pouze daného
+    balíčku, ve kterém se uživatel nachází.
+    \item[\textbf{add}] Pouze obaluje funkcionalitu příkazu 
+    \texttt{git add [soubory]}
+    \item[\textbf{commit}] Spouští příkaz \texttt{git commit}. V
+    případě, že se uživatel nenachází ve \textit{feature branch},
+    přepne do ní nebo ji vytvoří.
+    \item[\textbf{push}] Udělá \texttt{git push origin
+    <feature-branch>:<větev-balíčku>} a připraví tak půdu pro
+    následné vytvoření pull requestu oproti větve balíčku. Případně
+    může uživatel explicitně zažádat přepínačem o automatické
+    vytvoření pull requestu skrze GitHub API.
+    \item[\textbf{update}] Aktualizuje aktuální balíček, ve kterém
+    se uživatel nachází.
+    \item[\textbf{clone}] Naklonuje a inicializuje repozitář.
+    \item[\textbf{list}] Vypíše na výstup seznam balíčků v repozitáři.
+    \item[\textbf{genspec}] Pokusí se uživateli na základě poskytnutých
+    metadat vygenerovat spec soubor a pokud si uživatel zvolí, pokusí
+    se jej i otestovat, jestli se balíček sestaví. Tento příkaz využívá
+    různé existující generátory spec souborů jako je například
+    \textbf{pyp2spec} \cite{pyp2spec}.
+\end{itemize}
 
 
 \subsection{Automatická aktualizace balíčků}
 
-Systém bude periodicky hlídat upstream verzi balíčku (co měsíc/týden/den)
+Systém bude periodicky hlídat upstream verzi balíčku\footnote{co měsíc/týden/den} 
 a při zjištění nové verze se provede pokus o aktualizaci. Bohužel je nevýhodné
 využít již navrženého schématu k aktualizaci skrze pull request kvůli
 přísným limitům GitHubu na vytváření obsahu \cite{gh_secondary_rate_limits}
@@ -345,10 +406,10 @@ a velmi omezujícímu způsobu, jak se těmto chybám s limity vyhnout
 Pokus o aktualizaci se provede vytvořením nové větve a změnou atributu
 \textbf{version} v metadatech balíčku na nejnovější verzi. Po aplikování
 změn do této větve se nad ní spustí stejný CI systém, který testuje pull
-requesty, jen se bude lišit spouštěč události, jenž bude push do testovací
-větve \cite{gh_push_trigger}. Po úspěšném sestavení balíčku se testovací 
-větev spojí s hlavní větví a úplně se tak vyhneme nutnosti vytvářet pull
-request. V případě neúspěchu bude kontaktován správce uvedený v metadatech
+requesty, jen se bude lišit spouštěč události, jenž bude \textbf{push} do
+testovací větve \cite{gh_push_trigger}. Po úspěšném sestavení balíčku se 
+testovací větev spojí s hlavní větví balíčku. Tak se vyhneme nutnosti vytvářet 
+pull request. V případě neúspěchu bude kontaktován správce uvedený v metadatech
 balíčku.
 
 
@@ -378,31 +439,95 @@ zajištěna skrze GitHub Actions. Výběr build systému a k tomu vhodného
 % ==================================================================================== %
 
 
-\chapter{Metody}
+\chapter{Zvolení build systému a úložiště}
 
-Možnosti, jak zabalit software a následně jej jakkoliv spravovat je
-jistě spousta. Pro náš účel jsou vhodné metody, které jsou uživatelsky
-přívětivé, software jde s jejich pomocí snadno zabalit a v neposlední řadě
-je důležité, aby nad zabaleným softwarem měl plnou kontrolu jeho správce,
-který může libovolně a rychle přidávat nebo odstraňovat software. Kvůli poslední
-zmíněné vlastnosti tak odpadávají možnosti jako snažit se zabalit software
-do nějaké distribuce, poněvadž zabalit software do oficiálních repozitářů
-distribucí je typicky časově velmi nákladná činnost.
+Pro build systém a k tomu příslušné úložiště jsem se rozhodl vybírat mezi dvěma 
+možnostmi. Jako první možnost, vzhledem k mé zkušenosti s balením softwaru do 
+Fedory a obecně s balením RPM balíčků, jsem se rozhodl použít již dříve zmíněný 
+Copr v sekci \ref{item:1.3.1}. Copr je řešení specifické, omezující se pouze na
+některé Linuxové distribuce, byť umožňuje zabalit software do spousty distribucí
+založených na RPM. Z tohoto důvodu jsem jako druhé řešení zvolil způsob, který
+se nebude omezovat pouze na některé distribuce. 
+
+Jako druhou možnost jak sestavovat balíčky jsem zvolil řešení, u kterého
+nezáleží na konkrétní Linuxové distribuci jako u mého předchozího rozhodnutí.
+K zabalení, nasazení a distribuci software napříč Linuxovými distribucemi
+máme na výběr mezi třemi možnostmi a to Flatpak, Snap a AppImage.
+
+K sestavování Flatpak nebo AppImage balíčků je možností použít službu Open
+Build Service (dále jen OBS) \cite{obs}, která zároveň poskytuje funkcionalitu
+balit software mimo jiné i do více formátů napříč různými distribucemi
+\cite{obs_package_formats}. Zároveň, stejně jako Copr, slouží jako databáze
+těchto sestavených balíčků připravených k instalaci, které si můžeme z jejich
+databáze stáhnout a nainstalovat tak u sebe \cite{obs_flatpak}.
+
+
+\section{Vyloučení Snapu}
+
+
+\begin{markdown*}{%
+  hybrid,
+  definitionLists,
+  footnotes,
+  inlineFootnotes,
+  hashEnumerators,
+  fencedCode,
+  citations,
+  citationNbsps,
+  pipeTables,
+  tableCaptions,
+}
+```
+TODO vysvetlit proc ne Snap... neexistuje zadna tak jednoducha sluzba jako OBS
+nebo Copr, ktera by vybuildila snap. 
+exituje https://snapcraft.io/docs/build-from-github a
+https://snapcraft.io/docs/remote-build
+ale cele se to nevyplati a skola by musela mit vlastni uloziste a hostovat repozitar
+tady jsou linky jak udelat vlastni snap store a cele je to proste tezke
+https://forum.snapcraft.io/t/how-to-host-your-private-store/1790
+https://forum.snapcraft.io/t/external-repositories/1760/26
+https://github.com/noise/snapstore
+oficialni snap dokumentace k tomu:
+https://docs.ubuntu.com/snap-store-proxy/en/install
+https://ubuntu.com/core/docs/dedicated-snap-store
+porovnani snap ofc storu a soukromych: mel by dost nevyhod -> nepouzitelny vcelku
+https://ubuntu.com/core/services/guide/snap-store-vs-iot-app-store
+https://ubuntu.com/core/services/guide/iot-app-store-intro
+```
+\end{markdown*}
+
+
 
 % ------------------------------------------------------------------------------------ %
 
 \section{Copr}
 
+TODO tady bude popis toho jak funguje COPR
+
+\subsection{Integrace pomocí Packitu}
+
 % ------------------------------------------------------------------------------------ %
 
-\section{Flatpak}
+\section{OBS}
 
+TODO tady bude popis toho jak by reseni fungovalo s flatpakem a appimage
 
-\subsection{Repozitář}
+flatpak a appimage buildy bude vytvaret  open build service od openSUSE
 
-Samotný Flatpak není takovou službou, jak je tomu u Copru, repozitář by bylo
-nutno zprovoznit za pomocí zdrojů, které by poskytnula sama fakulta.
+integrace s GH je o hodne pozadu oproti packitu
+\text{https://openbuildservice.org/2021/05/31/scm-integration/}
 
+\subsection{Flatpak}
+
+\subsection{AppImage}
+
+TODO tady napis ze AppImage se musi spustet rucne, byla by nutnost udelat nejaky
+dalsi tool, ktery by byl basically takovy maly package manager - tzn ze by instaloval
+programy tak aby se normalne daly pustit klasika a taky aby kontroloval aktualizace.
+nebyl by to package manager v pravem slova smyslu, bo by neresil wbc dependency.
+ale musel by resit aktualizace a je to nejaka praca navic.
+
+\subsection{Integrace OBS s GitHubem}
 
 % ==================================================================================== %
 % ==================================================================================== %
@@ -410,7 +535,7 @@ nutno zprovoznit za pomocí zdrojů, které by poskytnula sama fakulta.
 
 \chapter{Srovnání metod}
 
-V této kapitole jsem se zaměřil na srovnání použitých metod z předchozí
+V této části jsem se zaměřil na srovnání použitých metod z předchozí
 kapitoly. Srovnával jsem na základě předem definovaných kritérií, zvážil
 jejich výhody i nevýhody a následně vybral vhodnější metodu k implementaci
 řešení.
@@ -421,55 +546,69 @@ jejich výhody i nevýhody a následně vybral vhodnější metodu k implementac
 
 Pro výběr lepší metody je nutné zvolit kritéria, která budou zřetelně hodnotit
 různé vlastnosti srovnávané metody. Zvolil jsem čtyři důležitá kritéria:
+(TODO dohledat lepsi literaturu na tohle nez je ta aktualni a upravit to podle ni)
 
-\paragraph{Nároky na údržbu}
-Vzhledem k faktu, že správcem celého systému má být vyučující, musí být správa
-celého systému co nejméně časově náročná, ideálně bezúdržbová. Důraz bude
-kladen hlavně na části systému, které potenciálně vyžadují pravidelnou
-údržbu a také na části, které mohou selhat a bude třeba je znovu zprovoznit
-silami fakulty.
+\begin{itemize}
+    \item[\textbf{Nároky na údržbu}] Vzhledem k faktu, že správcem celého
+    systému má být vyučující, musí být správa celého systému co nejméně
+    časově náročná, ideálně bezúdržbová. Důraz bude kladen hlavně na části
+    systému, které potenciálně vyžadují pravidelnou údržbu a také na části,
+    které mohou selhat a bude třeba je znovu zprovoznit silami fakulty.
+    \item[\textbf{Nároky na zdroje}] Zvolené řešení může potřebovat ke
+    svému hladkému provozu nějaké zdroje, které mohou být například:
+    úložiště, výpočetní výkon nebo potřeba dalšího správce, který by
+    řešil problémy typu aktualizace celého systému a byl by schopen
+    zprovoznit systém v případě, že by cokoliv selhalo. Zdroje fakulty
+    samozřejmě nejsou neomezené a tedy řešení by mělo využívat dostupné
+    zdroje fakulty střídmě a ideálně bez potřeby správce navíc.
+    \item[\textbf{Uživatelská přívětivost}] V ideálním případě by si
+    uživatel měl o nainstalování softwaru na své zařízení říct jedním 
+    příkazem nebo pár kliknutími. Pokud by bylo komplikované software
+    nainstalovat na zařízení uživatele, ztrácelo by to smysl.
+    \item[\textbf{Proveditelnost}] A v neposlední řadě bych měl být schopen
+    celý systém se zvolenou metodou implementovat v rozumném časovém 
+    rozmezí, které je hodno bakalářské práci a to do takové podoby, ve které
+    bude systém použitelný a nebo by mohla být nad systémem připravena další
+    bakalářská práce, která by celý systém dokončila do použitelného stavu.
+    V případě extrémní složitosti a časové náročnosti při  návrhu a
+    implementaci systému jej nemá smysl dělat, jelikož by v tomto případě
+    nemusel také být nikdy dokončen.
+    \item[\textbf{Spolehlivost}]
+\end{itemize}
 
-\paragraph{Nároky na zdroje}
-Zvolené řešení může potřebovat ke svému hladkému provozu nějaké zdroje, které
-mohou být například: úložiště, výpočetní výkon nebo potřeba dalšího správce,
-který by řešil problémy typu aktualizace celého systému a byl by schopen zprovoznit
-systém v případě, že by cokoliv selhalo. Zdroje fakulty samozřejmě nejsou neomezené
-a tedy řešení by mělo využívat dostupné zdroje fakulty střídmě a ideálně bez potřeby
-správce navíc.
-
-\paragraph{Uživatelská přívětivost}
-V ideálním případě by si uživatel měl o nainstalování softwaru na své zařízení
-říct jedním příkazem nebo pár kliknutími. Pokud by bylo komplikované software
-nainstalovat na zařízení uživatele, ztrácelo by to smysl.
-
-\paragraph{Proveditelnost}
-A v neposlední řadě bych měl být schopen celý systém se zvolenou metodou 
-implementovat v rozumném časovém rozmezí, které je hodno bakalářské práci 
-a to do takové podoby, ve které bude systém použitelný a nebo by mohla být
-nad systémem připravena další bakalářská práce, která by celý systém dokončila
-do použitelného stavu. V případě extrémní složitosti a časové náročnosti při 
-návrhu a implementaci systému jej nemá smysl dělat, jelikož by v tomto případě
-nemusel také být nikdy dokončen.
-
- \paragraph{Spolehlivost}
 
 % ------------------------------------------------------------------------------------ %
 
 \section{Copr}
 
-popis copru
+TODO srovnani vlastnosti copru s packitem
 
 % ------------------------------------------------------------------------------------ %
 
-\section{Flatpak}
+\section{OBS}
 
-popis flatpaku
+TODO srovnani vlatnosti obs jako takoveho (slaba integrace CI a blabla)
+
+
+\subsection{Flatpak}
+
+TODO vyhodnoceni OBS + flatpak
+
+\subsection{AppImage}
+
+TODO vyhodnoceni Appimage + OBS
+
+\subsection{TODO vybrani viteze mezi flatpakem a appimage}
+
+TODO oba s tim ze se budou pouzivat spolecne s OBS
 
 % ------------------------------------------------------------------------------------ %
 
 \section{Výběr vhodné metody}
 
-sekce o srovnani flatpaku s coprem a vyber viteze
+TODO sekce o vyberu mezi coprem a (flatpakem nebo appimage - vitez z vyse uvedeneho)
+(spoiler: pouziju copr kvuli velmi slusne integraci s githubem pomoci packitu
+coz usetri neskutecne moc prace - OBS nic takoveho nema)
 
 
 % ==================================================================================== %
